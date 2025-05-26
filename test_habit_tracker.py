@@ -4,7 +4,7 @@ from analytics import (
     compute_current_streak,
     compute_longest_streak,
     count_missed_periods,
-    determine_most_struggled_habit,
+    determine_most_challenging_habit,
     get_longest_streaks_by_periodicity
 )
 from create_predefined_data import create_predefined_data
@@ -12,8 +12,7 @@ from datetime import datetime
 from freezegun import freeze_time
 import os
 import sqlite3
-
-
+from quote_class import Quote
 
 # Pytest fixture to set up data, the data is not deleted after the tests
 @pytest.fixture(scope="module")
@@ -51,12 +50,12 @@ def test_habit_creation(test_data):
 def test_mark_as_completed(test_data):
     """Test marking habits as completed"""
     # Check completion dates for Weekly_Workout (should be all Mondays in April 2025)
-    dates = Habit.load_completion_dates("Weekly_Workout")
+    dates = Habit.load_completion_dates_and_times("Weekly_Workout")
     assert len(dates) == 4  # 4 Mondays in April 1-28
     assert all(date_str.startswith("2025-04-") for date_str in dates)
 
     # Check Daily_Reading was marked every day
-    dates = Habit.load_completion_dates("Daily_Reading")
+    dates = Habit.load_completion_dates_and_times("Daily_Reading",time=False)
     assert len(dates) == 28  # April 1-28
 
 
@@ -121,12 +120,15 @@ def test_missed_periods(test_data):
     assert missed == 20  # 20 weekdays missed
 
 
-def test_most_struggled_habit(test_data):
-    """Test determination of most struggled habit"""
-    result = determine_most_struggled_habit()
-    # Evening_Walk should be the most struggled (only completed on 8/28 days)
+def test_most_challenging_habit(test_data):
+    """Test determination of most challenging habit"""
+    result = determine_most_challenging_habit()
+    # Evening_Walk should be the most challenging
+    # completed Only Saturdays and Sundays
+    # (only completed on 8/28 days)
+    # 8 weekend days in April 1-28
     assert "Evening_Walk" in result
-    assert "8 out of 28" in result  # 8 weekend days in April 1-28
+    assert "8 out of 28" in result
     assert "28.6%" in result  # Completion ratio
 
 
@@ -152,7 +154,7 @@ def test_habit_deletion(test_data):
 
     # Verify it exists
     assert "Temp_Habit" in Habit.load_habits()
-    assert len(Habit.load_completion_dates("Temp_Habit")) == 1
+    assert len(Habit.load_completion_dates_and_times("Temp_Habit")) == 1
 
     # Delete it
     Habit.delete_habit("Temp_Habit")
@@ -165,14 +167,14 @@ def test_habit_deletion(test_data):
 def test_clear_habit_history(test_data):
     """Test clearing habit history"""
     # Verify Water_Intake has completion dates
-    dates = Habit.load_completion_dates("Water_Intake")
+    dates = Habit.load_completion_dates_and_times("Water_Intake")
     assert len(dates) > 0
 
     # Clear history
     Habit.clear_habit_history("Water_Intake")
 
     # Verify cleared
-    dates = Habit.load_completion_dates("Water_Intake")
+    dates = Habit.load_completion_dates_and_times("Water_Intake")
     assert len(dates) == 0
 
 
@@ -193,4 +195,22 @@ def test_habit_exists(test_data):
     assert Habit.habit_exists("Weekly_Workout")
     assert not Habit.habit_exists("Non_Existent_Habit")
 
+
+def test_add_quote(monkeypatch, tmp_path):
+    """Test quote addition with automatic tempo file cleanup"""
+    # Set up temporary file
+    test_file = tmp_path / "test_quotes.json"
+
+    # Patch the Quote class to use our temp file
+    monkeypatch.setattr(Quote, "filename", str(test_file))
+
+    # Create and save test quotes
+    Quote("Test quote 1", "Test Author 1").save_quote()
+    Quote("Test quote 2", "Test Author 2").save_quote()
+
+    # Verify addition
+    loaded = Quote.load_quotes()
+    assert {"Test quote 1": "Test Author 1"} in loaded
+    assert {"Test quote 2": "Test Author 2"} in loaded
+    # Cleanup happens automatically when pytest tmp_path is used
 

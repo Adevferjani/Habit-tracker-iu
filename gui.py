@@ -4,6 +4,7 @@ from habit_class import Habit
 import analytics
 from typing import List, Optional
 import sqlite3
+from quote_class import Quote
 
 
 class HabitTrackerGUI:
@@ -33,8 +34,9 @@ class HabitTrackerGUI:
             ("Delete a Habit", self.delete_habit),
             ("Delete all Habits",self.delete_all_habits),
             ("Clear Habit Tracking Data", self.clear_habit_data),
-            ("View Longest Streak Across All Habits", self.show_longest_streaks),
-            ("View Most Challenging Habit", self.show_struggled),
+            ("View Longest Streak Across All Habits", self.view_longest_streaks),
+            ("View Most Challenging Habit", self.view_most_struggled),
+            ("Boost Zone", self.manage_quotes),
             ("Exit Application", self.root.destroy)
         ]
 
@@ -104,7 +106,7 @@ class HabitTrackerGUI:
         """Mark habit as completed"""
         habits = self.refresh_habit_list()
         if not habits:
-            messagebox.showinfo("Info", "No Habits yet. Create a new one first, then mark it as completed.")
+            messagebox.showinfo("Info", "No Habits yet. Create a Habit first.")
             return
 
         habit = self.select_habit(habits)
@@ -118,7 +120,7 @@ class HabitTrackerGUI:
         if not habits:
             messagebox.showinfo("Info", "No Habits Yet, Create One First.")
         else:
-            messagebox.showinfo("Your Habits", "\n".join(habits))
+            messagebox.showinfo("Habits", "\n".join(habits))
 
     def view_habits_by_periodicity(self, target: str) -> None:
         """Show habits by periodicity"""
@@ -182,14 +184,15 @@ class HabitTrackerGUI:
             ):
                 Habit.clear_habit_history(habit)
                 messagebox.showinfo("Cleared", f"Data for '{habit}' cleared.")
+
     @staticmethod
-    def show_struggled() -> None:
+    def view_most_struggled() -> None:
         """Show most struggled habit"""
-        result = analytics.determine_most_struggled_habit()
+        result = analytics.determine_most_challenging_habit()
         messagebox.showinfo("Most Struggled Habit", result)
 
     @staticmethod
-    def show_longest_streaks() -> None:
+    def view_longest_streaks() -> None:
         """Show the longest streaks"""
 
         result = analytics.get_longest_streaks_by_periodicity(formatted=True)
@@ -226,17 +229,17 @@ class HabitTrackerGUI:
             return
 
         if selected == "View Habit Info":
-            self.show_habit_info(habit)
+            self.view_habit_info(habit)
         elif selected == "View Current Streak":
-            self.show_current_streak(habit, period_block)
+            self.view_current_streak(habit, period_block)
         elif selected == "View Longest Streak":
-            self.show_longest_streak(habit, period_block)
+            self.view_longest_streak(habit, period_block)
         elif selected ==  "View Current And Longest Streak":
-            self.show_both_streaks(habit, period_block)
+            self.view_both_streaks(habit, period_block)
         elif selected ==  "View Completion Dates":
-            self.show_completion_dates(habit)
+            self.view_completion_dates(habit)
         elif selected == "View Missed Periods":
-            self.show_missed_periods(habit)
+            self.view_missed_periods(habit)
 
     def select_analysis_option(self, options: List[str]) -> Optional[str]:
         """Dialog to select analysis option"""
@@ -261,7 +264,7 @@ class HabitTrackerGUI:
         return getattr(selection, 'choice', None)
 
     @staticmethod
-    def show_habit_info(habit: str) -> None:
+    def view_habit_info(habit: str) -> None:
         """Show habit information(description, periodicity, creation date"""
         try:
             conn = sqlite3.connect('habits.db')
@@ -287,7 +290,7 @@ class HabitTrackerGUI:
             messagebox.showerror("Error", "Could not access habit data.")
 
     @staticmethod
-    def show_current_streak( habit: str, period_block: str) -> None:
+    def view_current_streak( habit: str, period_block: str) -> None:
         """Show current streak"""
         streak = analytics.compute_current_streak(habit)
         messagebox.showinfo(
@@ -295,7 +298,7 @@ class HabitTrackerGUI:
             f"The current streak is: {streak} {period_block}."
         )
     @staticmethod
-    def show_longest_streak( habit: str, period_block: str) -> None:
+    def view_longest_streak( habit: str, period_block: str) -> None:
         """Show the longest streak for a habit
         if many streaks are equal and are the longest it returns the first"""
         length, start, end = analytics.compute_longest_streak(habit)
@@ -306,7 +309,7 @@ class HabitTrackerGUI:
         )
 
     @staticmethod
-    def show_both_streaks(habit: str, period_block: str) -> None:
+    def view_both_streaks(habit: str, period_block: str) -> None:
         """Show both current and longest streaks"""
         current = analytics.compute_current_streak(habit)
         length, start, end = analytics.compute_longest_streak(habit)
@@ -319,16 +322,16 @@ class HabitTrackerGUI:
 
 
     @staticmethod
-    def show_completion_dates(habit: str) -> None:
+    def view_completion_dates(habit: str) -> None:
         """Show completion dates for a habit"""
-        dates = Habit.load_completion_dates_and_times(habit)
+        dates = Habit.load_completion_dates_and_times(habit,time=True)
         if not dates:
             messagebox.showinfo("Completion Dates", "No completions recorded.")
         else:
             messagebox.showinfo("Completion Dates", "\n".join(dates))
 
     @staticmethod
-    def show_missed_periods( habit: str) -> None:
+    def view_missed_periods( habit: str) -> None:
         """Show missed periods for a habit"""
         missed = analytics.get_missed_periods(habit)
         if not missed:
@@ -352,6 +355,88 @@ class HabitTrackerGUI:
             ):
                 Habit.cleanup_data()
                 messagebox.showinfo("Deleted", f"All Habits Deleted.")
+
+    def manage_quotes(self) -> None:
+        """Manage motivational quotes submenu"""
+        window = tk.Toplevel(self.root)
+        window.title("Motivational Quotes")
+
+        button_config = [
+            ("Get Motivated", self.get_motivation),
+            ("Add a Quote", self.add_quote),
+            ("Delete All Quotes", self.delete_all_quotes_dialog)
+        ]
+
+        for text, cmd in button_config:
+            tk.Button(
+                window,
+                text=text,
+                command=lambda c=cmd: (c(), window.destroy()),
+                width=25
+            ).pack(pady=10)
+
+
+
+
+    @staticmethod
+    def get_motivation() -> None:
+        """Show a random quote from the collection"""
+        quotes = Quote.load_quotes()
+        if not quotes:
+            messagebox.showinfo("No Quotes", "No quotes available. Add some first!")
+            return
+
+        # Select a random quote
+        import random
+        random_quote = random.choice(quotes)
+        quote_text, author = list(random_quote.items())[0]
+        messagebox.showinfo("Motivational Quote", f'"{quote_text}"\n- {author}')
+
+    def add_quote(self) -> None:
+        """Dialog for adding a new quote"""
+        window = tk.Toplevel(self.root)
+        window.title("Add New Quote")
+
+        # Quote entry
+        tk.Label(window, text="Quote Text:").pack(pady=(10, 0))
+        quote_entry = tk.Text(window, height=4, width=40)
+        quote_entry.pack(pady=5)
+
+        # Author entry
+        tk.Label(window, text="Author:").pack(pady=(10, 0))
+        author_entry = tk.Entry(window)
+        author_entry.pack(pady=5)
+
+        def submit() -> None:
+            quote_text = quote_entry.get("1.0", tk.END).strip()
+            author = author_entry.get().strip()
+
+            if not quote_text or not author:
+                messagebox.showerror("Error", "Both fields are required.")
+                return
+
+            # Create and save quote
+            quote = Quote(quote_text, author)
+            quote.save_quote()
+            messagebox.showinfo("Success", "Quote added successfully!")
+            window.destroy()
+
+        tk.Button(window, text="Save Quote", command=submit).pack(pady=10)
+
+    @staticmethod
+    def delete_all_quotes_dialog() -> None:
+        """Delete all quotes dialog"""
+        quotes = Quote.load_quotes()
+        if not quotes:
+            messagebox.showinfo("Info", "No quotes found.")
+            return
+
+        if messagebox.askyesno(
+                "Confirm",
+                "Are you sure you want to delete ALL quotes?\nThis action cannot be undone!"
+        ):
+            Quote.delete_all_quotes()
+            messagebox.showinfo("Deleted", "All quotes have been deleted.")
 
 
 if __name__ == "__main__":

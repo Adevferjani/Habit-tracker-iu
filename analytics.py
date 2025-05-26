@@ -9,7 +9,7 @@ def compute_current_streak(habit_name: str) -> int:
     Returns:
         int: Current streak length (0 if no active streak)
     """
-    completion_dates = Habit.load_completion_dates(habit_name)
+    completion_dates = Habit.load_completion_dates_and_times(habit_name)
     periodicity = Habit.periodicity_check(habit_name)
 
     if not completion_dates or not periodicity:
@@ -80,7 +80,7 @@ def compute_longest_streak(habit_name: str) -> Tuple[int, Optional[str], Optiona
     Returns:
         Tuple: (streak_length, start_date, end_date)
     """
-    completion_dates = Habit.load_completion_dates(habit_name)
+    completion_dates = Habit.load_completion_dates_and_times(habit_name)
     periodicity = Habit.periodicity_check(habit_name)
 
     if not completion_dates or not periodicity:
@@ -196,7 +196,7 @@ def get_missed_periods(habit_name: str) -> List[Union[str, Tuple[str, str]]]:
     """
     periodicity = Habit.periodicity_check(habit_name)
     creation_date = Habit.get_creation_date(habit_name)
-    completion_dates = Habit.load_completion_dates(habit_name)
+    completion_dates = Habit.load_completion_dates_and_times(habit_name)
 
     if not periodicity or not creation_date:
         return []
@@ -243,7 +243,7 @@ def get_missed_periods(habit_name: str) -> List[Union[str, Tuple[str, str]]]:
     return missed
 
 
-def determine_most_struggled_habit() -> str:
+def determine_most_challenging_habit() -> str:
     """
     Determines the habit with the lowest completion ratio:
     (number of completions / total periods since creation).
@@ -274,7 +274,7 @@ def determine_most_struggled_habit() -> str:
         try:
             completion_dates = {
                 datetime.strptime(d, "%Y-%m-%d").date()
-                for d in Habit.load_completion_dates(habit)
+                for d in Habit.load_completion_dates_and_times(habit)
             }
         except Exception:
             completion_dates = set()
@@ -321,7 +321,7 @@ def determine_most_struggled_habit() -> str:
     return (
         f"Most struggled habit: '{worst['name']}'\n"
         f"- Periodicity: {worst['periodicity']}\n"
-        f"- Completed: {worst['completed']} out of {worst['total']} {unit}s (Since Habit Creation)\n"
+        f"- Completed: {worst['completed']} out of {worst['total']} {unit}s since habit creation\n"
         f"- Completion ratio: {worst['ratio']:.1%}"
     )
 

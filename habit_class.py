@@ -83,18 +83,6 @@ class Habit:
         con.close()
 
 
-    @staticmethod
-    def load_completion_dates(habit_name: str) -> List[str]:
-        """Load all completion dates for a habit"""
-        try:
-            con = sqlite3.connect(f'{habit_name}_track_data.db')
-            cur = con.cursor()
-            cur.execute("SELECT date, time FROM habit_completion_dates ORDER BY date ASC")
-            dates = [row[0] for row in cur.fetchall()]
-            con.close()
-            return dates
-        except sqlite3.OperationalError:
-            return []
 
     @staticmethod
     def periodicity_check(habit_name: str) -> Optional[str]:
@@ -170,21 +158,26 @@ class Habit:
 
     @staticmethod
     def load_habits() -> List[str]:
-        """Load all habit names"""
+        """Load all habits names"""
         try:
             with open("habits_list.json", "r") as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
+
+
     @staticmethod
-    def load_completion_dates_and_times(habit_name: str) -> List[str]:
-        """Load all completion dates and times for a habit"""
+    def load_completion_dates_and_times(habit_name: str, time: bool=False) -> List[str]:
+        """Load all completion dates and times or only dates for a habit"""
         try:
             con = sqlite3.connect(f'{habit_name}_track_data.db')
             cur = con.cursor()
             cur.execute("SELECT date, time FROM habit_completion_dates ORDER BY date ASC")
-            dates = [row[0]+" "+row[1] for row in cur.fetchall()]
+            if time:  # return the dates and times
+                dates = [row[0]+" "+row[1] for row in cur.fetchall()]
+            else:  # return only the dates
+                dates = [row[0] for row in cur.fetchall()]
             con.close()
             return dates
         except sqlite3.OperationalError:

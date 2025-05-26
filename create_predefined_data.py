@@ -6,7 +6,6 @@ def create_predefined_data():
 
     # Clean up all existent data (Mandatory for tests pass)
     Habit.cleanup_data()
-
     # Create habits
     habits = [
         # Weekly habit (completed every Monday in April 2025)
