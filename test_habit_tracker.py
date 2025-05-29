@@ -14,13 +14,17 @@ import os
 import sqlite3
 from quote_class import Quote
 
-# Pytest fixture to set up data, the data is not deleted after the tests
+# Pytest fixture to set up and clean up test data
 @pytest.fixture(scope="module")
 def test_data():
     """Fixture to clean up and create test data"""
     # Freeze time to 28-04-2025 for all tests
     with freeze_time("2025-04-28"):
         create_predefined_data()
+        yield
+        # Clean up test data after all tests are done
+        Habit.cleanup_data()
+
 
 
 @pytest.fixture(autouse=True)
@@ -28,6 +32,7 @@ def set_fixed_date():
     """Automatically mock datetime to 28-04-2025 for all tests"""
     with freeze_time("2025-04-28"):
         yield
+
 
 
 def test_habit_creation(test_data):
@@ -213,4 +218,7 @@ def test_add_quote(monkeypatch, tmp_path):
     assert {"Test quote 1": "Test Author 1"} in loaded
     assert {"Test quote 2": "Test Author 2"} in loaded
     # Cleanup happens automatically when pytest tmp_path is used
+
+
+
 
