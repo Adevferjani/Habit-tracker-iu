@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from habit_class import Habit
 import analytics
+from create_predefined_data import create_predefined_data
 from typing import List, Optional
 import sqlite3
 from quote_class import Quote
@@ -37,16 +38,28 @@ class HabitTrackerGUI:
             ("View Longest Streak Across All Habits", self.view_longest_streaks),
             ("View Most Challenging Habit", self.view_most_struggled),
             ("Boost Zone", self.manage_quotes),
+            ("Set Data to Predefined Data", self.set_predefined_data),
             ("Exit Application", self.root.destroy)
         ]
 
         for text, command in menu_items:
-            tk.Button(
-                self.root,
-                text=text,
-                command=command,
-                width=40
-            ).pack(pady=5)
+            if text =="Set Data to Predefined Data":
+                tk.Button(
+                    self.root,
+                    text=text,
+                    command=command,
+                    width=40,
+                    bg="#ff9999"
+                ).pack(pady=5)
+
+            else:
+                tk.Button(
+                    self.root,
+                    text=text,
+                    command=command,
+                    width=40
+                ).pack(pady=5)
+
 
     @staticmethod
     def refresh_habit_list() -> List[str]:
@@ -438,6 +451,29 @@ class HabitTrackerGUI:
             Quote.delete_all_quotes()
             messagebox.showinfo("Deleted", "All quotes have been deleted.")
 
+    @staticmethod
+    def set_predefined_data() -> None:
+        """Set data to predefined test data"""
+        # Confirmation
+        if not messagebox.askyesno(
+                "Warning",
+                "This will DELETE ALL EXISTING DATA and replace it with predefined test data.\n"
+                "Are you sure you want to continue?",
+                icon='warning'
+        ):
+            return
+        try:
+            create_predefined_data()
+            messagebox.showinfo(
+                "Success",
+                "Predefined test data loaded successfully!\n"
+                "Created 1 weekly and 4 daily habits with completion data for April 2025."
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Error",
+                f"Failed to load predefined data: {str(e)}"
+            )
 
 if __name__ == "__main__":
     root = tk.Tk()
