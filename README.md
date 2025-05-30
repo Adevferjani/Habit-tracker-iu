@@ -29,7 +29,7 @@ The following GUI should appear:
 
 ![GUI_menu](pictures/gui_menu.png)
 ## How to Use
-Please refer to the user-flow diagram above to guide you.
+Please refer to the user flow diagram above to guide you.
 
 ## How to test the application
 This application comes with a testing module "test_habit_tracker.py".
