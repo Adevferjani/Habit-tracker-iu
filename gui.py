@@ -6,7 +6,12 @@ from create_predefined_data import create_predefined_data
 from typing import List, Optional
 import sqlite3
 from quote_class import Quote
+import os
 
+# Create data directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 class HabitTrackerGUI:
     def __init__(self, root: tk.Tk) -> None:
@@ -38,12 +43,12 @@ class HabitTrackerGUI:
             ("View Longest Streak Across All Habits", self.view_longest_streaks),
             ("View Most Challenging Habit", self.view_most_struggled),
             ("Boost Zone", self.manage_quotes),
-            ("Set Data to Predefined Data", self.set_predefined_data),
+            ("Reset Data to Predefined Data", self.set_predefined_data),
             ("Exit Application", self.root.destroy)
         ]
 
         for text, command in menu_items:
-            if text =="Set Data to Predefined Data":
+            if text =="Reset Data to Predefined Data":
                 tk.Button(
                     self.root,
                     text=text,
@@ -59,7 +64,6 @@ class HabitTrackerGUI:
                     command=command,
                     width=40
                 ).pack(pady=5)
-
 
     @staticmethod
     def refresh_habit_list() -> List[str]:
@@ -280,7 +284,8 @@ class HabitTrackerGUI:
     def view_habit_info(habit: str) -> None:
         """Show habit information(description, periodicity, creation date"""
         try:
-            conn = sqlite3.connect('habits.db')
+            habits_db = os.path.join(DATA_DIR, 'habits.db')
+            conn = sqlite3.connect(habits_db)
             cur = conn.cursor()
             cur.execute("""
                 SELECT description, periodicity, creation_date 
@@ -387,9 +392,6 @@ class HabitTrackerGUI:
                 command=lambda c=cmd: (c(), window.destroy()),
                 width=25
             ).pack(pady=10)
-
-
-
 
     @staticmethod
     def get_motivation() -> None:

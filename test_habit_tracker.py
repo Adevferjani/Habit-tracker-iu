@@ -14,10 +14,17 @@ import os
 import sqlite3
 from quote_class import Quote
 
+# Import DATA_DIR from habit_class
+from habit_class import DATA_DIR
+
+
 # Pytest fixture to set up and clean up test data
 @pytest.fixture(scope="module")
 def test_data():
     """Fixture to clean up and create test data"""
+    # Create data directory if it doesn't exist
+    os.makedirs(DATA_DIR, exist_ok=True)
+
     # Freeze time to 28-04-2025 for all tests
     with freeze_time("2025-04-28"):
         create_predefined_data()
@@ -26,13 +33,11 @@ def test_data():
         Habit.cleanup_data()
 
 
-
 @pytest.fixture(autouse=True)
 def set_fixed_date():
     """Automatically mock datetime to 28-04-2025 for all tests"""
     with freeze_time("2025-04-28"):
         yield
-
 
 
 def test_habit_creation(test_data):
@@ -43,7 +48,8 @@ def test_habit_creation(test_data):
     assert "Daily_Reading" in habits
 
     # Verify one habit's details
-    conn = sqlite3.connect('habits.db')
+    habits_db = os.path.join(DATA_DIR, 'habits.db')
+    conn = sqlite3.connect(habits_db)
     cur = conn.cursor()
     cur.execute("SELECT description, periodicity FROM habits_table WHERE name='Daily_Reading'")
     result = cur.fetchone()
@@ -60,7 +66,7 @@ def test_mark_as_completed(test_data):
     assert all(date_str.startswith("2025-04-") for date_str in dates)
 
     # Check Daily_Reading was marked every day
-    dates = Habit.load_completion_dates_and_times("Daily_Reading",time=False)
+    dates = Habit.load_completion_dates_and_times("Daily_Reading", time=False)
     assert len(dates) == 28  # April 1-28
 
 
@@ -78,7 +84,6 @@ def test_current_streak_calculation(test_data):
     # On April 28 (Monday), streak should be 1 (just the Monday)
     streak = compute_current_streak("Meditation")
     assert streak == 1
-
 
 
 def test_longest_streak_calculation(test_data):
@@ -166,7 +171,8 @@ def test_habit_deletion(test_data):
 
     # Verify deletion
     assert "Temp_Habit" not in Habit.load_habits()
-    assert not os.path.exists("Temp_Habit_track_data.db")
+    track_db = os.path.join(DATA_DIR, "Temp_Habit_track_data.db")
+    assert not os.path.exists(track_db)
 
 
 def test_clear_habit_history(test_data):
@@ -218,7 +224,3 @@ def test_add_quote(monkeypatch, tmp_path):
     assert {"Test quote 1": "Test Author 1"} in loaded
     assert {"Test quote 2": "Test Author 2"} in loaded
     # Cleanup happens automatically when pytest tmp_path is used
-
-
-
-
