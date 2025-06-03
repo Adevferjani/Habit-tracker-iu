@@ -41,3 +41,7 @@ In order to run the tests, you would need to install pytest:
 than run this command:
 
 `pytest test_habit_tracker.py`
+
+The following is a summary of the test fixture used by the testing module
+
+![Test_fixture_summary](pictures/test_fixture_summary.png)
