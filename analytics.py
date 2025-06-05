@@ -5,7 +5,8 @@ from datetime import date, datetime, timedelta
 
 def compute_current_streak(habit_name: str) -> int:
     """
-    Computes the current streak based on completion dates and periodicity.
+    Computes the current streak based on completion dates and periodicity
+    ->Streak is calculated in days or weeks depending on the habit periodicity.
     Returns:
         int: Current streak length (0 if no active streak)
     """
@@ -246,10 +247,10 @@ def get_missed_periods(habit_name: str) -> List[Union[str, Tuple[str, str]]]:
 def determine_most_challenging_habit() -> str:
     """
     Determines the habit with the lowest completion ratio:
-    (number of completions / total periods since creation).
+    (number of completion periods / total periods since creation).
 
     Returns:
-        str: Description of the most struggled habit.
+        str: Description of the most challenging habit.
     """
     habits = Habit.load_habits()
     if not habits:
@@ -319,7 +320,7 @@ def determine_most_challenging_habit() -> str:
 
     unit = 'day' if worst['periodicity'] == 'daily' else 'week'
     return (
-        f"Most struggled habit: '{worst['name']}'\n"
+        f"Most challenging habit: '{worst['name']}'\n"
         f"- Periodicity: {worst['periodicity']}\n"
         f"- Completed: {worst['completed']} out of {worst['total']} {unit}s since habit creation\n"
         f"- Completion ratio: {worst['ratio']:.1%}"

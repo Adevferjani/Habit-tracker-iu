@@ -14,23 +14,31 @@ import os
 import sqlite3
 from quote_class import Quote
 
-# Import DATA_DIR from habit_class
-from habit_class import DATA_DIR
+# Import habit_class module to adjust data directory to a temporary directory
+import habit_class
 
 
-# Pytest fixture to set up and clean up test data
+# Pytest fixture to set up and clean up test data in a temporary directory
 @pytest.fixture(scope="module")
-def test_data():
-    """Fixture to clean up and create test data"""
-    # Create data directory if it doesn't exist
-    os.makedirs(DATA_DIR, exist_ok=True)
+def test_data(tmp_path_factory):
+    """Fixture to create test data in a temporary directory"""
+    # Create temporary directory
+    temp_dir = tmp_path_factory.mktemp("test_data")
 
-    # Freeze time to 28-04-2025 for all tests
+    # Backup original DATA_DIR and set to temporary directory
+    original_data_dir = habit_class.DATA_DIR
+    habit_class.DATA_DIR = str(temp_dir)
+
+    # Create data directory if it doesn't exist
+    os.makedirs(habit_class.DATA_DIR, exist_ok=True)
+
+    # Freeze testing time and create testing data with the create_predefined_data module
     with freeze_time("2025-04-28"):
         create_predefined_data()
-        yield
-        # Clean up test data after all tests are done
-        Habit.cleanup_data()
+    yield
+
+    # Restore original DATA_DIR after testing
+    habit_class.DATA_DIR = original_data_dir
 
 
 @pytest.fixture(autouse=True)
@@ -48,6 +56,7 @@ def test_habit_creation(test_data):
     assert "Daily_Reading" in habits
 
     # Verify one habit's details
+    from habit_class import DATA_DIR  # Import current temp DATA_DIR
     habits_db = os.path.join(DATA_DIR, 'habits.db')
     conn = sqlite3.connect(habits_db)
     cur = conn.cursor()
@@ -100,7 +109,7 @@ def test_longest_streak_calculation(test_data):
     assert start == "2025-04-07"  # First Monday
     assert end == "2025-04-28"  # Last Monday
 
-    # Meditation - longest streak is 5 days (Mon-Fri weekdays)-> first 5 days streak
+    # Meditation -longest streak is 5 days (Mon-Fri weekdays)-> first 5 days streak
     length, start, end = compute_longest_streak("Meditation")
     assert length == 5
     assert start == "2025-04-07"  # Monday
@@ -135,7 +144,7 @@ def test_most_challenging_habit(test_data):
     result = determine_most_challenging_habit()
     # Evening_Walk should be the most challenging
     # completed Only Saturdays and Sundays
-    # (only completed on 8/28 days)
+    # (only completed 8/28 days)
     # 8 weekend days in April 1-28
     assert "Evening_Walk" in result
     assert "8 out of 28" in result
@@ -171,6 +180,7 @@ def test_habit_deletion(test_data):
 
     # Verify deletion
     assert "Temp_Habit" not in Habit.load_habits()
+    from habit_class import DATA_DIR  # Import current DATA_DIR
     track_db = os.path.join(DATA_DIR, "Temp_Habit_track_data.db")
     assert not os.path.exists(track_db)
 

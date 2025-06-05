@@ -2,9 +2,10 @@ from datetime import datetime, date
 from habit_class import Habit
 def create_predefined_data():
     """Create predefined test data with 5 habits (1 weekly, 4 daily) and fixed completion patterns
-    All habits are created on 1 April 2025."""
+    All habits are created on 1 April 2025.
+    !!! Since this function is used to reset data to predefined data it deletes all existing habit data."""
 
-    # Clean up all existent data (Mandatory for tests pass)
+    # Clean up all existent data.
     Habit.cleanup_data()
     # Create habits
     habits = [

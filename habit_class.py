@@ -68,11 +68,17 @@ class Habit:
             with open(habits_list, 'w') as f:
                 json.dump(habit_names, f, indent=2)
 
-        print("Habit saved successfully.")
+        print(f"Habit {self.name} saved successfully.")
 
     @staticmethod
     def mark_as_completed(habit_name: str, date_time: datetime.datetime = None) -> None:
-        """Mark habit as completed at specific date/time"""
+        """
+        Marks the habit as completed at the specified date and time.
+
+        Adds the completion date to the tracking data only once per defined periodicity (e.g., daily, weekly).
+        Subsequent completions within the same period are ignored.
+        """
+
         if date_time is None:
             date_time = datetime.datetime.now()
 
@@ -173,7 +179,7 @@ class Habit:
 
     @staticmethod
     def load_habits() -> List[str]:
-        """Load all habits names"""
+        """Load all habits names from the habits_list json file"""
         habits_list = os.path.join(DATA_DIR, 'habits_list.json')
         try:
             with open(habits_list, "r") as f:

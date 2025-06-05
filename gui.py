@@ -41,14 +41,15 @@ class HabitTrackerGUI:
             ("Delete all Habits",self.delete_all_habits),
             ("Clear Habit Tracking Data", self.clear_habit_data),
             ("View Longest Streak Across All Habits", self.view_longest_streaks),
-            ("View Most Challenging Habit", self.view_most_struggled),
+            ("View Most Challenging Habit", self.view_most_challenging),
             ("Boost Zone", self.manage_quotes),
             ("Reset Data to Predefined Data", self.set_predefined_data),
             ("Exit Application", self.root.destroy)
         ]
 
         for text, command in menu_items:
-            if text =="Reset Data to Predefined Data":
+            # Red alerting background color for sensitive actions button
+            if text =="Reset Data to Predefined Data" or text =="Delete all Habits":
                 tk.Button(
                     self.root,
                     text=text,
@@ -203,14 +204,14 @@ class HabitTrackerGUI:
                 messagebox.showinfo("Cleared", f"Data for '{habit}' cleared.")
 
     @staticmethod
-    def view_most_struggled() -> None:
-        """Show most struggled habit"""
+    def view_most_challenging() -> None:
+        """Show most challenging habit"""
         result = analytics.determine_most_challenging_habit()
-        messagebox.showinfo("Most Struggled Habit", result)
+        messagebox.showinfo("Most challenging Habit", result)
 
     @staticmethod
     def view_longest_streaks() -> None:
-        """Show the longest streaks"""
+        """Show the longest streaks across all daily/weekly habits"""
 
         result = analytics.get_longest_streaks_by_periodicity(formatted=True)
         messagebox.showinfo("Longest Streaks", result)
@@ -282,7 +283,7 @@ class HabitTrackerGUI:
 
     @staticmethod
     def view_habit_info(habit: str) -> None:
-        """Show habit information(description, periodicity, creation date"""
+        """View habit information(description, periodicity, creation date)"""
         try:
             habits_db = os.path.join(DATA_DIR, 'habits.db')
             conn = sqlite3.connect(habits_db)
@@ -309,7 +310,9 @@ class HabitTrackerGUI:
 
     @staticmethod
     def view_current_streak( habit: str, period_block: str) -> None:
-        """Show current streak"""
+        """View current streak for a habit
+        The streak is counted in days or weeks depending on the habit periodicity
+        """
         streak = analytics.compute_current_streak(habit)
         messagebox.showinfo(
             "Current Streak",
@@ -395,7 +398,7 @@ class HabitTrackerGUI:
 
     @staticmethod
     def get_motivation() -> None:
-        """Show a random quote from the collection"""
+        """Show a random quote from the user collection"""
         quotes = Quote.load_quotes()
         if not quotes:
             messagebox.showinfo("No Quotes", "No quotes available. Add some first!")
