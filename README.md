@@ -4,11 +4,11 @@
 Python backend-focused habit tracking application with graphical user interface, implementing object-oriented and functional programming concepts.
 
 ## Features
-- Create, track, and analyze daily/weekly habits
-- Habit analytics and streak tracking
-- Simple graphical user interface
-- Predefined test data for demonstration
-- Motivational quotes system 
+- Create, track, and analyze daily/weekly habits.
+- Habit analytics and streak tracking.
+- Simple graphical user interface.
+- Predefined test data for demonstration.
+- Motivational quotes system .
 
 ## System Overview
 ### User Flow Diagram
