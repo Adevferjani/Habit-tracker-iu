@@ -5,11 +5,10 @@ Python backend-focused habit tracking application with graphical user interface,
 
 ## Features
 - Create, track, and analyze daily/weekly habits
-- Predefined test data for demonstration
-- Simple graphical user interface
-- Motivational quotes system
 - Habit analytics and streak tracking
-- Data persistence using JSON storage
+- Simple graphical user interface
+- Predefined test data for demonstration
+- Motivational quotes system 
 
 ## System Overview
 ### User Flow Diagram
@@ -55,6 +54,35 @@ the test suite verifies core functionality using pytest:
    pytest test_habit_tracker.py -v
 The following is a summary of the test fixture used by the testing module
 ![Test fixture summary](pictures/test_fixture_summary.png)
+
+## Troubleshooting
+
+### Common Issues & Solutions
+
+- **❌ Python command not found**
+  
+  Use `python3` instead of `python`:
+  ```bash
+  python3 --version
+  python3 gui.py
+ - **⚠️ Missing dependencies**
+   
+   Reinstall requirements
+   ```bash
+   pip install -r requirements.txt
+ - **🔒 Permission errors**
+   
+   Use virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+   Linux/macOS:
+   ```
+   source venv/bin/activate
+   ```
+   Windows:
+   ```
+   .\venv\Scripts\activate
 
 ## License
 [MIT License](LICENSE) - See repository for details
