@@ -67,22 +67,9 @@ The following is a summary of the test fixture used by the testing module
   python3 gui.py
  - **⚠️ Missing dependencies**
    
-   Reinstall requirements
+   Reinstall requirements:
    ```bash
    pip install -r requirements.txt
- - **🔒 Permission errors**
-   
-   Use virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-   Linux/macOS:
-   ```
-   source venv/bin/activate
-   ```
-   Windows:
-   ```
-   .\venv\Scripts\activate
 
 ## License
 [MIT License](LICENSE) - See repository for details
