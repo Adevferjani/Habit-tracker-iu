@@ -8,7 +8,7 @@ Python backend-focused habit tracking application with graphical user interface,
 - Habit analytics and streak tracking.
 - Simple graphical user interface.
 - Predefined test data for demonstration.
-- Motivational quotes system .
+- Motivational quotes system.
 
 ## System Overview
 ### User Flow Diagram
