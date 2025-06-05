@@ -55,3 +55,6 @@ the test suite verifies core functionality using pytest:
    pytest test_habit_tracker.py -v
 The following is a summary of the test fixture used by the testing module
 ![Test fixture summary](pictures/test_fixture_summary.png)
+
+## License
+[MIT License](LICENSE) - See repository for details
