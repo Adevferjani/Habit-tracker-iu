@@ -12,7 +12,10 @@ Python backend-focused habit tracking application with graphical user interface,
 
 ## System Overview
 ### User Flow Diagram
-![Habit Tracker User Flow Diagram](pictures/user-flow.png)
+<p align="center">
+  <img src="pictures/user-flow.png" alt="Habit Tracker User Flow Diagram" />
+</p>
+
 
 ### Class Diagram
 ![Application Class Structure](pictures/class-diagram.png)
@@ -39,7 +42,10 @@ Python backend-focused habit tracking application with graphical user interface,
    ```
 Expected Initial Interface:
 
-![GUI menu](pictures/gui_menu.png)
+<p align="center">
+  <img src="pictures/gui_menu.png" alt="GUI menu" />
+</p>
+
 
 ## Usage guide
 Please refer to the user flow diagram above to guide you.
